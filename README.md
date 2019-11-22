@@ -4,9 +4,9 @@
 
 ### Recursive Problems
 
-* [Flood Fill](https://github.com/jamesmcm/rust-interview-qs/tree/master/flood_fill): https://leetcode.com/problems/flood-fill
-* [Number of Islands](https://github.com/jamesmcm/rust-interview-qs/tree/master/num_islands): https://leetcode.com/problems/number-of-islands/
-* [Number to Words](./num_words): https://leetcode.com/problems/integer-to-english-words/
+* [Flood Fill](flood_fill): https://leetcode.com/problems/flood-fill
+* [Number of Islands](num_islands): https://leetcode.com/problems/number-of-islands/
+* [Number to Words](number_to_words): https://leetcode.com/problems/integer-to-english-words/
 
 
 
