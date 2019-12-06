@@ -91,14 +91,14 @@ fn parse(s: &str) -> Node {
                     let movechild = ((&mut root).as_mut().unwrap().children).1.take();
                     (&mut root).as_mut().unwrap().children.1 =
                         Some(Box::new(Node::new(symbol, (movechild, None))));
-                      // lastNode = Some((&root).as_ref().unwrap().children.1.unwrap().as_ref());
+                    // lastNode = Some((&root).as_ref().unwrap().children.1.unwrap().as_ref());
 
                     continue;
                 }
             }
         } else {
-          // Fill last none with value
-          // lastNode.unwrap().children.1 = Some(Box::new(Node::new(symbol, (None, None))));
+            // Fill last none with value
+            // lastNode.unwrap().children.1 = Some(Box::new(Node::new(symbol, (None, None))));
         }
     }
 
