@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::mem;
 
 #[derive(Debug)]
 struct Node {
@@ -46,7 +47,7 @@ where
 
 fn parse(s: &str) -> Node {
     let operators: Vec<char> = vec!['/', '*', '+', '-'];
-    let mut root: Option<Node> = None;
+    let mut root: Option<RefCell<Node>> = None;
     let mut lastNode: Option<std::cell::RefMut<Node>> = None;
 
     for c in split_with_matches(
@@ -63,17 +64,17 @@ fn parse(s: &str) -> Node {
         println!("{:?}", symbol);
         // Empty tree
         if let None = root {
-            root = Some(Node::new(symbol, (None, None)));
+            root = Some(RefCell::new(Node::new(symbol, (None, None))));
             continue;
         }
 
         // New tree
-        if let Symbol::Value(_) = (&root).as_ref().unwrap().value {
-            root = Some(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap()))), None)));
+        if let Symbol::Value(_) = root.as_ref().unwrap().borrow().value {
+            root.as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new((&root).as_ref().unwrap().into_inner()))), None)));
             continue;
         }
-        if let None = (&root).as_ref().unwrap().children.1 {
-            (&mut root).as_mut().unwrap().children.1 =
+        if let None = (&root).as_ref().unwrap().borrow().children.1 {
+            (&root).as_ref().unwrap().borrow_mut().children.1 =
                 Some(Rc::new(RefCell::new(Node::new(symbol, (None, None)))));
             continue;
         }
@@ -82,21 +83,21 @@ fn parse(s: &str) -> Node {
         // Lowest precedence should be at root
         // Traverse operators until we find operator that is higher precedence - we should be parent of that subtree
         if let Symbol::Operator(o) = symbol {
-            if let Symbol::Operator(o2) = root.as_ref().unwrap().value {
+            if let Symbol::Operator(o2) = root.as_ref().unwrap().borrow().value {
                 if operators.iter().position(|&r| r == o) >= operators.iter().position(|&r| r == o2)
                 {
-                    root = Some(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap()))), None)));
-                    lastNode = Some(RefCell::new(root.as_ref().unwrap()).borrow_mut());
+                    root.as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap().into_inner()))), None)));
+                    lastNode = Some(root.as_ref().unwrap().borrow_mut());
                     continue;
                 } else {
                     // TODO: if children are values (leaf nodes)
                     // TODO: loop here
-                    let movechild = ((&mut root).as_mut().unwrap().children).1.take();
-                    (&mut root).as_mut().unwrap().children.1 =
+                    let movechild = ((&root).as_ref().unwrap().borrow_mut().children).1.take();
+                    (&root).as_ref().unwrap().borrow_mut().children.1 =
                         Some(Rc::new(RefCell::new(Node::new(symbol, (movechild, None)))));
                     //lastNode = Some(&*(&root.as_ref().unwrap().children.1.as_ref()).as_ref().unwrap().borrow_mut());
                     lastNode = Some(
-                        (*root.as_ref().unwrap().children.1.as_ref().unwrap()).borrow_mut()
+                        (&root.as_ref().unwrap().borrow_mut().children.1.as_ref().unwrap()).borrow_mut()
                         );
 
                     continue;
@@ -109,7 +110,8 @@ fn parse(s: &str) -> Node {
         }
     }
 
-    let out = root.unwrap();
+    mem::drop(lastNode);
+    let out = root.unwrap().into_inner();
     out
 }
 
