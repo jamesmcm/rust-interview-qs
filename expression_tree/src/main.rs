@@ -1,14 +1,17 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 #[derive(Debug)]
 struct Node {
     value: Symbol,
-    children: (Option<Box<Node>>, Option<Box<Node>>),
+    children: (Option<Rc<RefCell<Node>>>, Option<Rc<RefCell<Node>>>),
 }
 
 impl Node {
-    pub fn new(value: Symbol, children: (Option<Box<Node>>, Option<Box<Node>>)) -> Self {
+    pub fn new(value: Symbol, children: (Option<Rc<RefCell<Node>>>, Option<Rc<RefCell<Node>>>)) -> Self {
         Self {
-            value: value,
-            children: children,
+            value,
+            children,
         }
     }
 }
@@ -44,7 +47,7 @@ where
 fn parse(s: &str) -> Node {
     let operators: Vec<char> = vec!['/', '*', '+', '-'];
     let mut root: Option<Node> = None;
-    // let mut lastNode: Option<&Node> = None;
+    let mut lastNode: Option<std::cell::RefMut<Node>> = None;
 
     for c in split_with_matches(
         &s.chars().filter(|c| !c.is_whitespace()).collect::<String>(),
@@ -66,12 +69,12 @@ fn parse(s: &str) -> Node {
 
         // New tree
         if let Symbol::Value(_) = (&root).as_ref().unwrap().value {
-            root = Some(Node::new(symbol, (Some(Box::new(root.unwrap())), None)));
+            root = Some(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap()))), None)));
             continue;
         }
         if let None = (&root).as_ref().unwrap().children.1 {
             (&mut root).as_mut().unwrap().children.1 =
-                Some(Box::new(Node::new(symbol, (None, None))));
+                Some(Rc::new(RefCell::new(Node::new(symbol, (None, None)))));
             continue;
         }
 
@@ -82,23 +85,27 @@ fn parse(s: &str) -> Node {
             if let Symbol::Operator(o2) = root.as_ref().unwrap().value {
                 if operators.iter().position(|&r| r == o) >= operators.iter().position(|&r| r == o2)
                 {
-                    root = Some(Node::new(symbol, (Some(Box::new(root.unwrap())), None)));
-                    // lastNode = root.as_ref();
+                    root = Some(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap()))), None)));
+                    lastNode = Some(RefCell::new(root.as_ref().unwrap()).borrow_mut());
                     continue;
                 } else {
                     // TODO: if children are values (leaf nodes)
                     // TODO: loop here
                     let movechild = ((&mut root).as_mut().unwrap().children).1.take();
                     (&mut root).as_mut().unwrap().children.1 =
-                        Some(Box::new(Node::new(symbol, (movechild, None))));
-                    // lastNode = Some((&root).as_ref().unwrap().children.1.unwrap().as_ref());
+                        Some(Rc::new(RefCell::new(Node::new(symbol, (movechild, None)))));
+                    //lastNode = Some(&*(&root.as_ref().unwrap().children.1.as_ref()).as_ref().unwrap().borrow_mut());
+                    lastNode = Some(
+                        (*root.as_ref().unwrap().children.1.as_ref().unwrap()).borrow_mut()
+                        );
 
                     continue;
                 }
             }
         } else {
+            // Symbol is Value not Operator
             // Fill last none with value
-            // lastNode.unwrap().children.1 = Some(Box::new(Node::new(symbol, (None, None))));
+            lastNode.unwrap().children.1 = Some(Rc::new(RefCell::new(Node::new(symbol, (None, None)))));
         }
     }
 
