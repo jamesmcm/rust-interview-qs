@@ -9,7 +9,18 @@ extern crate maplit;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::sync::Arc;
-use std::thread;
+
+struct Task {
+    found_words: Vec<String>,
+    word_dict: Arc<HashSet<String>>,
+    cs: String
+}
+
+impl Task {
+    pub fn join(self) -> Vec<Vec<String>> {
+        Solution::word_break_inner(self.cs, self.word_dict, self.found_words)
+    }
+}
 
 struct Solution {}
 
@@ -29,9 +40,7 @@ impl Solution {
     ) -> Vec<Vec<String>> {
         let mut teststring: String = String::new();
         let chars_remaining: usize = cs.len();
-        let mut my_threads: Vec<
-            thread::JoinHandle<std::vec::Vec<std::vec::Vec<std::string::String>>>,
-        > = Vec::new();
+        let mut my_threads: Vec<Task> = Vec::new();
         let mut output: Vec<Vec<String>> = Vec::new();
 
         for (i, c) in cs.chars().enumerate() {
@@ -43,14 +52,17 @@ impl Solution {
                     let shared_wd = word_dict.clone();
                     new_fw.push(teststring.clone());
 
-                    my_threads.push(thread::spawn(move || {
-                        Solution::word_break_inner(newstr, shared_wd, new_fw)
-                    }));
+                    my_threads.push( Task {
+                        cs: newstr,
+                        word_dict: shared_wd,
+                        found_words: new_fw,
+                    });
+
                 }
             } else {
                 if word_dict.contains(&teststring) {
                     for thread in my_threads {
-                        for v in thread.join().unwrap() {
+                        for v in thread.join() {
                             output.push(v);
                         }
                     }
@@ -61,7 +73,7 @@ impl Solution {
             }
         }
         for thread in my_threads {
-            for v in thread.join().unwrap() {
+            for v in thread.join() {
                 output.push(v);
             }
         }
@@ -72,7 +84,8 @@ impl Solution {
 fn main() {
     println!(
         "{:?}",
-        Solution::word_break(String::from("test"), vec![String::from("test")])
+        Solution::word_break(String::from("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        vec![String::from("a"),String::from("aa"),String::from("aaa"),String::from("aaaa"),String::from("aaaaa"),String::from("aaaaaa"),String::from("aaaaaaa"),String::from("aaaaaaaa"),String::from("aaaaaaaaa"),String::from("aaaaaaaaaa")])
     );
 }
 
