@@ -42,8 +42,10 @@ impl Solution {
         let chars_remaining: usize = cs.len();
         let mut my_threads: Vec<Task> = Vec::new();
         let mut output: Vec<Vec<String>> = Vec::new();
+        let maxlen: usize = word_dict.iter().map(|x| x.len()).max().unwrap_or(0);
 
         for (i, c) in cs.chars().enumerate() {
+            if i > maxlen {break;}
             teststring.push(c);
             if i < chars_remaining - 1 {
                 if word_dict.contains(&teststring) {
