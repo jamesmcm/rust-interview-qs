@@ -70,7 +70,7 @@ fn parse(s: &str) -> Node {
 
         // New tree
         if let Symbol::Value(_) = root.as_ref().unwrap().borrow().value {
-            root.as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new((&root).as_ref().unwrap().into_inner()))), None)));
+            (&root).as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new((&root).as_ref().unwrap().into_inner()))), None)));
             continue;
         }
         if let None = (&root).as_ref().unwrap().borrow().children.1 {
@@ -86,8 +86,8 @@ fn parse(s: &str) -> Node {
             if let Symbol::Operator(o2) = root.as_ref().unwrap().borrow().value {
                 if operators.iter().position(|&r| r == o) >= operators.iter().position(|&r| r == o2)
                 {
-                    root.as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new(root.unwrap().into_inner()))), None)));
-                    lastNode = Some(root.as_ref().unwrap().borrow_mut());
+                    (&root).as_ref().unwrap().replace(Node::new(symbol, (Some(Rc::new(RefCell::new((&root).unwrap().into_inner()))), None)));
+                    lastNode = Some((&root).as_ref().unwrap().borrow_mut());
                     continue;
                 } else {
                     // TODO: if children are values (leaf nodes)
@@ -106,7 +106,7 @@ fn parse(s: &str) -> Node {
         } else {
             // Symbol is Value not Operator
             // Fill last none with value
-            lastNode.unwrap().children.1 = Some(Rc::new(RefCell::new(Node::new(symbol, (None, None)))));
+            (&mut lastNode).as_mut().unwrap().children.1 = Some(Rc::new(RefCell::new(Node::new(symbol, (None, None)))));
         }
     }
 
