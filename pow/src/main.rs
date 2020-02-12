@@ -1,38 +1,43 @@
-/* 
+/*
 Implement pow(x,y)
 Ignore real number exponents
 */
+
 #![feature(step_trait)]
 
-use std::ops::MulAssign;
-use std::ops::Div;
+extern crate num_integer;
+extern crate num_traits;
+use num_integer::Integer;
+use num_traits::identities::One;
+use num_traits::identities::Zero;
+use num_traits::sign::abs;
+use num_traits::NumAssign;
+use num_traits::sign::Signed;
 use std::iter::Step;
-
-
-trait Abs {
-    fn abs(&self) -> Self {}
-}
-
+use num_traits::FromPrimitive;
 
 struct Solution {}
 
 impl Solution {
-    fn pow<T: MulAssign + Div + From<i32>, U: PartialOrd + PartialEq + From<i32> + Step + Abs>(base: T, exponent: U) -> T {
-        let out: T = T::from(1);
+    fn pow<T: NumAssign + One + Zero + Copy + FromPrimitive, U: Integer + NumAssign + One + Zero + Signed + Step + Copy>(
+        base: T,
+        exponent: U,
+    ) -> T {
+        let mut out: T = base;
         match exponent {
-        x if x != U::from(0) => {
-        for _i in U::from(0) .. exponent.abs(){
-            out *= out
-        }
-        },
-        _ => out = T::from(0),
+            x if x != num_traits::Zero::zero() => {
+                for _i in num_traits::One::one()..abs(exponent) {
+                    out *= out
+                }
+            }
+            _ => {out = num_traits::One::one()},
         }
 
-        // if exponent < U::from(0) { out = (T::from(1)) / out;}
+        if exponent < num_traits::Zero::zero()  { out = T::from_i32(1).unwrap() / out ;}
         out
     }
 }
 
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", Solution::pow(2, 4));
 }
