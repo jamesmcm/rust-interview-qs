@@ -1,6 +1,5 @@
 // https://leetcode.com/problems/maximum-subarray
-
-struct Solution {}
+pub struct Solution {}
 
 impl Solution {
     pub fn max_sub_array(nums: Vec<i32>) -> i32 {
@@ -64,10 +63,6 @@ impl Solution {
         }
         best
     }
-}
-
-fn main() {
-    println!("Hello, world!");
 }
 
 #[cfg(test)]

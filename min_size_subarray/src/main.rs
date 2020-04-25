@@ -6,6 +6,37 @@ impl Solution {
     pub fn min_sub_array_len(s: i32, nums: Vec<i32>) -> i32 {
         let mut cumsum = 0;
         let mut start = 0;
+        let mut best = 1 + nums.len() as i32;
+
+        let mut iterstart = nums.iter().enumerate();
+        let iterend = iterstart.clone();
+        for (end, endval) in iterend {
+            cumsum += endval;
+
+            if cumsum >= s {
+                // Shrink left
+                while cumsum >= s {
+                    let sval = iterstart.next().unwrap();
+                    start = sval.0;
+                    cumsum -= sval.1;
+                }
+
+                let x = (end - start) as i32;
+                if x < best {
+                    best = x;
+                }
+            }
+        }
+
+        if best as usize > nums.len() {
+            0
+        } else {
+            best + 1
+        }
+    }
+    pub fn min_sub_array_len_indices(s: i32, nums: Vec<i32>) -> i32 {
+        let mut cumsum = 0;
+        let mut start = 0;
         let mut end = 0;
         let mut best = 1 + nums.len() as i32;
 
