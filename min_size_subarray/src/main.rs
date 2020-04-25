@@ -10,6 +10,7 @@ impl Solution {
 
         let mut iterstart = nums.iter().enumerate();
         let iterend = iterstart.clone();
+
         for (end, endval) in iterend {
             cumsum += endval;
 
