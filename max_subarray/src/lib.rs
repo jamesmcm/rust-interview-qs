@@ -55,9 +55,9 @@ impl Solution {
         let mut best: i32 = std::i32::MIN;
         for i in 0..nums.len() {
             for j in i..nums.len() {
-                let sum = &nums[i..=j].iter().sum();
-                if *sum > best {
-                    best = *sum;
+                let sum = nums[i..=j].iter().sum();
+                if sum > best {
+                    best = sum;
                 }
             }
         }
