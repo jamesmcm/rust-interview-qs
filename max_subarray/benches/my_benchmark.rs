@@ -13,10 +13,15 @@ fn bench_fibs(c: &mut Criterion) {
     let mut group = c.benchmark_group("MaxSubarray");
     group.warm_up_time(Duration::from_millis(5));
     group.measurement_time(Duration::from_millis(10));
+    group.sample_size(10);
 
     let mut rand_arrays: Vec<Vec<i32>> = Vec::with_capacity(100);
-    for i in 0..100 {
-        rand_arrays.push(rand_vec(i + 1));
+    for i in [
+        1, 2, 5, 10, 15, 20, 25, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000,
+    ]
+    .iter()
+    {
+        rand_arrays.push(rand_vec(*i));
     }
 
     for i in rand_arrays.iter() {
