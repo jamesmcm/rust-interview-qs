@@ -23,10 +23,12 @@ impl MergeSort {
         let mut j = 0;
         while i < left.len() || j < right.len() {
             if i < left.len() && (j == right.len() || left[i] <= right[j]) {
+                // Here we really want to pop from front of slice
                 let val = unsafe { std::mem::replace(&mut left[i], std::mem::uninitialized()) };
                 out_slice.push(val);
                 i += 1;
             } else {
+                // Here we really want to pop from front of slice
                 let val = unsafe { std::mem::replace(&mut right[j], std::mem::uninitialized()) };
                 out_slice.push(val);
                 j += 1;
@@ -34,6 +36,8 @@ impl MergeSort {
         }
 
         unsafe {
+            // Copy our allocated vector back over the two adjacent, contiguous slices we were given
+            // And return as a single slice
             let ptr = left.as_mut_ptr();
             std::ptr::copy_nonoverlapping(out_slice.as_ptr(), ptr, out_slice.len());
             std::slice::from_raw_parts_mut(ptr, out_slice.len())
