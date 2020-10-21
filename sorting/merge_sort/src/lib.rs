@@ -22,14 +22,16 @@ impl MergeSort {
         let mut i = 0;
         let mut j = 0;
         while i < left.len() || j < right.len() {
+            // TODO: This does not work for non-Copy / wrapper types where the type is just a
+            // pointer to the heap
             if i < left.len() && (j == right.len() || left[i] <= right[j]) {
                 // Here we really want to pop from front of slice
-                let val = unsafe { std::mem::replace(&mut left[i], std::mem::uninitialized()) };
+                let val = unsafe { std::ptr::read(&mut left[i]) };
                 out_slice.push(val);
                 i += 1;
             } else {
                 // Here we really want to pop from front of slice
-                let val = unsafe { std::mem::replace(&mut right[j], std::mem::uninitialized()) };
+                let val = unsafe { std::ptr::read(&mut right[j]) };
                 out_slice.push(val);
                 j += 1;
             }
@@ -39,6 +41,7 @@ impl MergeSort {
             // Copy our allocated vector back over the two adjacent, contiguous slices we were given
             // And return as a single slice
             let ptr = left.as_mut_ptr();
+            // Note copy_nonoverlapping handles the size_of::<T> part for us
             std::ptr::copy_nonoverlapping(out_slice.as_ptr(), ptr, out_slice.len());
             std::slice::from_raw_parts_mut(ptr, out_slice.len())
         }
@@ -66,5 +69,24 @@ mod tests {
         let mut to_sort = vec![1, 5, 7, 2, 6, 8];
         let sorted = MergeSort::sort(&mut to_sort);
         assert_eq!(sorted, &[1, 2, 5, 6, 7, 8]);
+    }
+    #[test]
+    fn it_works3() {
+        let mut to_sort = vec![
+            "aa".to_string(),
+            "ac".to_string(),
+            "aa".to_string(),
+            "ab".to_string(),
+        ];
+        let sorted = MergeSort::sort(&mut to_sort);
+        assert_eq!(
+            sorted,
+            &[
+                "aa".to_string(),
+                "aa".to_string(),
+                "ab".to_string(),
+                "ac".to_string()
+            ]
+        );
     }
 }
