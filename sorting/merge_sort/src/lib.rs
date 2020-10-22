@@ -22,8 +22,6 @@ impl MergeSort {
         let mut i = 0;
         let mut j = 0;
         while i < left.len() || j < right.len() {
-            // TODO: This does not work for non-Copy / wrapper types where the type is just a
-            // pointer to the heap
             if i < left.len() && (j == right.len() || left[i] <= right[j]) {
                 // Here we really want to pop from front of slice
                 let val = unsafe { std::ptr::read(&mut left[i]) };
