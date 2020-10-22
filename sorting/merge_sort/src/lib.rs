@@ -40,10 +40,17 @@ impl MergeSort {
         unsafe {
             // Copy our allocated vector back over the two adjacent, contiguous slices we were given
             // And return as a single slice
+            let len = out_slice.len();
             let ptr = left.as_mut_ptr();
+            let out_ptr = out_slice.as_ptr();
+
+            // Forget so we don't trigger destructors when we overwrite with copy_nonoverlapping
+            // TODO: Does this leak memory or does dropping the final new slice still drop the
+            // elements?
+            std::mem::forget(out_slice);
             // Note copy_nonoverlapping handles the size_of::<T> part for us
-            std::ptr::copy_nonoverlapping(out_slice.as_ptr(), ptr, out_slice.len());
-            std::slice::from_raw_parts_mut(ptr, out_slice.len())
+            std::ptr::copy_nonoverlapping(out_ptr, ptr, len);
+            std::slice::from_raw_parts_mut(ptr, len)
         }
     }
 }
