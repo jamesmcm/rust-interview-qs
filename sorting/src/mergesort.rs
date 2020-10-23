@@ -1,6 +1,4 @@
-pub trait Sort<T: PartialOrd> {
-    fn sort(slice: &mut [T]) -> &mut [T];
-}
+use super::Sort;
 
 struct MergeSort {}
 
@@ -24,12 +22,12 @@ impl MergeSort {
         while i < left.len() || j < right.len() {
             if i < left.len() && (j == right.len() || left[i] <= right[j]) {
                 // Here we really want to pop from front of slice
-                let val = unsafe { std::ptr::read(&mut left[i]) };
+                let val = unsafe { std::ptr::read(&left[i]) };
                 out_slice.push(val);
                 i += 1;
             } else {
                 // Here we really want to pop from front of slice
-                let val = unsafe { std::ptr::read(&mut right[j]) };
+                let val = unsafe { std::ptr::read(&right[j]) };
                 out_slice.push(val);
                 j += 1;
             }
