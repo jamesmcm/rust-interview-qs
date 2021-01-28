@@ -1,5 +1,5 @@
 [package]
-name = "add_strings"
+name = "ocr_scan"
 version = "0.1.0"
 authors = ["jamesmcm"]
 edition = "2018"
